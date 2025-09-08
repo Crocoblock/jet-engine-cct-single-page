@@ -1,0 +1,1 @@
+{"version":3,"file":"./style-index.css","mappings":";;;AAAA;EACC;AACD;AAAC;EACC;AAEF,C","sources":["webpack://wp-cct-single-view/./assets/src/style.scss"],"sourcesContent":[".jet-cct-admin {\n\tmax-width: 960px;\n\t.components-panel {\n\t\tmargin-top: 16px;\n\t}\n}\n"],"names":[],"sourceRoot":""}
