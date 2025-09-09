@@ -51,5 +51,9 @@ For **Page title pattern** and **Meta description pattern** you can use plain ar
 - Using linked image in the Dynamic Image widget
 <img width="393" height="286" alt="image" src="https://github.com/user-attachments/assets/75861b36-3cdc-4671-89b5-5144b96d9fe9" />
 
-- Using a filter callback (mostly for Timber/Twig listings)
+- Using a filter callback on **any** field of this CCT (mostly for Timber/Twig listings)
 <img width="469" height="291" alt="image" src="https://github.com/user-attachments/assets/e814d796-aae0-4d12-9652-3605e869d727" />
+
+**Please note**
+
+URL can be correctlly retrieved, only when appropriate widget/callback is used in the context of the required CCT. In plain words - only inside CCT listing.
