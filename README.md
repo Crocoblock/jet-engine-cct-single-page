@@ -33,7 +33,7 @@ Each setup includes the next settings:
 
 - **Content Type** - CCT to add a single page for.
 - **Content template** - Listing Item template, which will be used as main content template for the single page. You can use any builders supported by JetEngine to create it.
-- **Slug field** - CCT field, which will be used to generate a slug of the current CCT item for the URL. You can use or specially defined field of your CCT, which is already formatted for the URL. Or any other **text** field of your CCT - plugin automatically formats it as URL slug.
+- **Slug field** - CCT field, which will be used to generate a slug of the current CCT item for the URL. You can use specially defined field of your CCT, which is already formatted for the URL. Or any other **text** field of your CCT - plugin automatically formats it as URL slug.
 <img width="1538" height="74" alt="image" src="https://github.com/user-attachments/assets/9d1b92de-fb3d-4f20-8f82-b9e9b4ff7543" />
 
 - **Page title pattern** - format of the page title, which will be generated for the current CCT item. Use fields of 
