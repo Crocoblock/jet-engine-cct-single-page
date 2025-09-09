@@ -7,6 +7,8 @@ class Frontend {
 
 	private static $instance = null;
 
+	protected $items_cache = [];
+
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
@@ -22,8 +24,12 @@ class Frontend {
 		add_filter( 'template_include', [ $this, 'template_include' ] );
 		add_filter( 'pre_get_document_title', [ $this, 'filter_title' ], 20 );
 		add_action( 'wp_head', [ $this, 'output_meta_description' ], 1 );
+		add_action( 'wp_head', [ $this, 'output_canonical_link' ], 1 );
 
-		add_action(  'jet-engine/callbacks/register', [ $this, 'register_link_callback' ]);
+		// redirect to the canonical link if is CCT page and current URL is not canonical
+		add_action( 'template_redirect', [ $this, 'maybe_redirect_to_canonical' ] );
+
+		add_action( 'jet-engine/callbacks/register', [ $this, 'register_link_callback' ] );
 
 		add_filter(
 			'jet-engine/listings/dynamic-link/fields',
@@ -42,6 +48,49 @@ class Frontend {
 			[ $this, 'maybe_set_cct_link' ],
 			20, 2
 		);
+	}
+
+	public function maybe_redirect_to_canonical() {
+
+		$base = get_query_var( 'is_single_cct_page' );
+
+		if ( ! $base ) {
+			return;
+		}
+
+		$id = absint( get_query_var( '_ID' ) );
+
+		if ( ! $id ) {
+			return;
+		}
+
+		$item = $this->get_item( $id, $base );
+
+		if ( ! $item ) {
+			return;
+		}
+
+		jet_engine()->listings->objects_stack->set_root_object( $item );
+		jet_engine()->listings->data->set_current_object( $item );
+
+		$canonical = $this->get_item_link();
+
+		if ( ! $canonical ) {
+			return;
+		}
+
+		$current_url_parts = parse_url( ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+		$canonical_parts = parse_url( $canonical );
+
+		// Extract slug part from both URLs
+		$current_path = isset($current_url_parts['path']) ? trim($current_url_parts['path'], '/') : '';
+		$canonical_path = isset($canonical_parts['path']) ? trim($canonical_parts['path'], '/') : '';
+
+		// If the path parts don't match, redirect to canonical URL
+		if ( $current_path !== $canonical_path ) {
+			wp_redirect( $canonical, 301 );
+			exit;
+		}
 	}
 
 	/**
@@ -106,7 +155,20 @@ class Frontend {
 			return '';
 		}
 
-		$slug = $slug_field && isset( $object->{$slug_field} ) ? sanitize_title( $object->{$slug_field} ) : '';
+		if ( $slug_field ) {
+			$slug_field = array_map( 'trim', explode( ',', $slug_field ) );
+		} else {
+			$slug_field = [];
+		}
+
+		$slug_field = array_filter( $slug_field );
+		$slug = '';
+
+		foreach ( $slug_field as $field ) {
+			if ( ! empty( $object->{$field} ) ) {
+				$slug = sanitize_title( $object->{$field} );
+			}
+		}
 
 		if ( ! $slug && $title_fallback ) {
 			$slug = sanitize_title( $title_fallback );
@@ -211,6 +273,16 @@ class Frontend {
 	 */
 	public function get_item( int $id, string $base = '' ) {
 
+		if ( ! $id || ! $base ) {
+			return null;
+		}
+
+		$item_key = $base . '_' . $id;
+
+		if ( isset( $this->items_cache[ $item_key ] ) ) {
+			return $this->items_cache[ $item_key ];
+		}
+
 		if ( ! class_exists( '\Jet_Engine\Modules\Custom_Content_Types\Module' ) ) {
 			return null;
 		}
@@ -239,6 +311,8 @@ class Frontend {
 		$flag = \OBJECT;
 		$content_type->db->set_format_flag( $flag );
 		$item = $content_type->db->get_item( $id );
+
+		$this->items_cache[ $item_key ] = $item;
 
 		return $item;
 	}
@@ -305,7 +379,7 @@ class Frontend {
 			return;
 		}
 
-		$item = self::get_item( $id, $base );
+		$item = $this->get_item( $id, $base );
 
 		if ( ! $item ) {
 			return;
@@ -328,6 +402,33 @@ class Frontend {
 
 		if ( $desc ) {
 			echo '<meta name="description" content="' . esc_attr( $desc ) . '">' . "\n";
+		}
+	}
+
+	public function output_canonical_link() {
+
+		$base = get_query_var( 'is_single_cct_page' );
+
+		if ( ! $base ) {
+			return;
+		}
+
+		$id = absint( get_query_var( '_ID' ) );
+
+		if ( ! $id ) {
+			return;
+		}
+
+		$item = $this->get_item( $id, $base );
+
+		if ( ! $item ) {
+			return;
+		}
+
+		$link = $this->get_item_link();
+
+		if ( $link ) {
+			echo '<link rel="canonical" href="' . esc_url( $link ) . '">' . "\n";
 		}
 	}
 

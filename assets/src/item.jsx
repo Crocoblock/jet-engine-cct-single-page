@@ -89,7 +89,7 @@ const SettingsItem = ( { item, onUpdate, index } ) => {
 			/>
 			<TextControl
 				label="Slug field"
-				help="Set CCT field to use as an item slug in the URL. Spaces in the field value will be replaced with dashes automatically on URL generation."
+				help="Set CCT field to use as an item slug in the URL. Spaces in the field value will be replaced with dashes automatically on URL generation. You can add multiple fields separated with commas, each next will be used if the previous is empty. Example: 'slug_field, title_field'"
 				value={slugField}
 				onChange={setSlugField}
 			/>

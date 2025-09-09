@@ -9,9 +9,6 @@ $base = get_query_var( 'is_single_cct_page' );
 
 $item = $id ? Frontend::instance()->get_item( $id, $base ) : null;
 
-jet_engine()->listings->objects_stack->set_root_object( $item );
-jet_engine()->listings->data->set_current_object( $item );
-
 if ( ! $item ) {
 	status_header( 404 );
 	nocache_headers();
