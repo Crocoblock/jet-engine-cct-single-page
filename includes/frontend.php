@@ -167,6 +167,7 @@ class Frontend {
 		foreach ( $slug_field as $field ) {
 			if ( ! empty( $object->{$field} ) ) {
 				$slug = sanitize_title( $object->{$field} );
+				break;
 			}
 		}
 
