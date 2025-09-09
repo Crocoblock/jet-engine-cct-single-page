@@ -7,5 +7,16 @@
 .jet-cct-admin .components-panel {
   margin-top: 16px;
 }
+.jet-cct-admin .jet-cct-admin-item__remove {
+  display: flex;
+  justify-content: flex-end;
+}
+.jet-cct-admin .jet-cct-admin-item__remove button {
+  position: relative;
+  margin-top: -41px;
+  margin-right: 30px;
+  background: #fff;
+  z-index: 9999;
+}
 
 /*# sourceMappingURL=style-index.css.map*/

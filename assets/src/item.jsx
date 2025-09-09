@@ -3,9 +3,10 @@ import {
 	PanelBody,
 	TextControl,
 	SelectControl,
+	Button,
 } from '@wordpress/components';
 
-const SettingsItem = ( { item, onUpdate } ) => {
+const SettingsItem = ( { item, onUpdate, index } ) => {
 
 	const [
 		rewriteBase,
@@ -49,12 +50,27 @@ const SettingsItem = ( { item, onUpdate } ) => {
 	}, [rewriteBase, listingId, title, description, cctID, slugField] );
 
 	return (
-		<PanelBody title={ rewriteBase } initialOpen={true}>
+		<PanelBody title={ `Item ${index + 1}: ${rewriteBase}` } initialOpen={true}>
+			<div className="jet-cct-admin-item__remove">
+				<Button
+					size="small"
+					variant="secondary"
+					isDestructive
+					onClick={ () => {
+						if ( confirm( 'Are you sure you want to remove this item?' ) ) {
+							onUpdate( null );
+						}
+					} }
+				>
+					Delete
+				</Button>
+			</div>
 			<TextControl
 				label="Rewrite base (URL prefix)"
 				help="Example: with 'my-cct', your URLs look like /my-cct/some-title-123"
 				value={rewriteBase}
 				onChange={setRewriteBase}
+				id={`jet-cct-admin-item-base-${index}`}
 			/>
 			<SelectControl
 				label="Content Type"
@@ -62,6 +78,7 @@ const SettingsItem = ( { item, onUpdate } ) => {
 				options={window.JET_CCT_ADMIN_DATA.contentTypes || []}
 				value={cctID}
 				onChange={setCctID}
+				id={`jet-cct-admin-item-cct-${index}`}
 			/>
 			<SelectControl
 				label="Content template"
@@ -88,6 +105,7 @@ const SettingsItem = ( { item, onUpdate } ) => {
 				value={description}
 				onChange={setDescription}
 			/>
+
 		</PanelBody>
 	);
 };

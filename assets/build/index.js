@@ -33,6 +33,31 @@ const App = () => {
   const save = async () => {
     setSaving(true);
     setNotice(null);
+
+    // Validate before save
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (!item.rewrite_base || item.rewrite_base.trim() === '') {
+        setNotice({
+          status: 'error',
+          message: `Item ${i + 1}: Rewrite base cannot be empty.`
+        });
+        setSaving(false);
+        // Focus on the first invalid field
+        document.querySelector(`#jet-cct-admin-item-base-${i}`).focus();
+        return;
+      }
+      if (!item.cct_id || parseInt(item.cct_id, 10) === 0) {
+        setNotice({
+          status: 'error',
+          message: `Item ${i + 1}: Content Type must be selected.`
+        });
+        setSaving(false);
+        // Focus on the first invalid field
+        document.querySelector(`#jet-cct-admin-item-cct-${i}`).focus();
+        return;
+      }
+    }
     try {
       const res = await window.fetch(window.JET_CCT_ADMIN_DATA.ajaxUrl, {
         method: 'POST',
@@ -80,7 +105,14 @@ const App = () => {
         children: "No CCT configurations found. Click \"Add New\" to create one."
       }), items.map((item, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_item__WEBPACK_IMPORTED_MODULE_3__["default"], {
         item: item,
+        index: index,
         onUpdate: updatedItem => {
+          // Remove item if null is passed
+          if (null === updatedItem) {
+            const newItems = items.filter((_, i) => i !== index);
+            setItems(newItems);
+            return;
+          }
           const newItems = [...items];
           newItems[index] = {
             ...newItems[index],
@@ -135,7 +167,8 @@ __webpack_require__.r(__webpack_exports__);
 
 const SettingsItem = ({
   item,
-  onUpdate
+  onUpdate,
+  index
 }) => {
   const [rewriteBase, setRewriteBase] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(item.rewrite_base || 'cct-' + Math.floor(Math.random() * 1000));
   const [listingId, setListingId] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(String(item.listing_id || '0'));
@@ -154,19 +187,34 @@ const SettingsItem = ({
     });
   }, [rewriteBase, listingId, title, description, cctID, slugField]);
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.PanelBody, {
-    title: rewriteBase,
+    title: `Item ${index + 1}: ${rewriteBase}`,
     initialOpen: true,
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+      className: "jet-cct-admin-item__remove",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+        size: "small",
+        variant: "secondary",
+        isDestructive: true,
+        onClick: () => {
+          if (confirm('Are you sure you want to remove this item?')) {
+            onUpdate(null);
+          }
+        },
+        children: "Delete"
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
       label: "Rewrite base (URL prefix)",
       help: "Example: with 'my-cct', your URLs look like /my-cct/some-title-123",
       value: rewriteBase,
-      onChange: setRewriteBase
+      onChange: setRewriteBase,
+      id: `jet-cct-admin-item-base-${index}`
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
       label: "Content Type",
       help: "Choose content type to rewrite.",
       options: window.JET_CCT_ADMIN_DATA.contentTypes || [],
       value: cctID,
-      onChange: setCctID
+      onChange: setCctID,
+      id: `jet-cct-admin-item-cct-${index}`
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
       label: "Content template",
       help: "JetEngine Listing Item used as a single page template.",

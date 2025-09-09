@@ -24,6 +24,26 @@ const App = () => {
 		setSaving(true);
 		setNotice(null);
 
+		// Validate before save
+		for (let i = 0; i < items.length; i++) {
+			const item = items[i];
+
+			if (!item.rewrite_base || item.rewrite_base.trim() === '') {
+				setNotice({ status: 'error', message: `Item ${i + 1}: Rewrite base cannot be empty.` });
+				setSaving(false);
+				// Focus on the first invalid field
+				document.querySelector(`#jet-cct-admin-item-base-${i}`).focus();
+				return;
+			}
+			if (!item.cct_id || parseInt(item.cct_id, 10) === 0) {
+				setNotice({ status: 'error', message: `Item ${i + 1}: Content Type must be selected.` });
+				setSaving(false);
+				// Focus on the first invalid field
+				document.querySelector(`#jet-cct-admin-item-cct-${i}`).focus();
+				return;
+			}
+		}
+
 		try {
 			const res = await window.fetch(window.JET_CCT_ADMIN_DATA.ajaxUrl, {
 				method: 'POST',
@@ -68,7 +88,16 @@ const App = () => {
 					<SettingsItem
 						key={index}
 						item={item}
+						index={index}
 						onUpdate={(updatedItem) => {
+
+							// Remove item if null is passed
+							if ( null === updatedItem ) {
+								const newItems = items.filter((_, i) => i !== index);
+								setItems(newItems);
+								return;
+							}
+
 							const newItems = [...items];
 							newItems[index] = { ...newItems[index], ...updatedItem };
 							setItems(newItems);
