@@ -348,10 +348,23 @@ class Frontend {
 			'/\%([a-zA-Z0-9_\-]+)\%/',
 			function( $matches ) use ( $item ) {
 				$token = $matches[1] ?? '';
+
 				if ( ! $token ) {
 					return '';
 				}
-				return $item->{$token} ?? '';
+
+				$value = $item->{$token} ?? '';
+
+				if ( is_array( $value ) ) {
+					$value = implode( ', ', $value );
+				} elseif ( is_object( $value ) ) {
+					$value = get_object_vars( $value );
+					$value = implode( ', ', $value );
+				} else {
+					$value = (string) $value;
+				}
+
+				return $value;
 			},
 			$pattern
 		);
